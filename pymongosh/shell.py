@@ -1,7 +1,7 @@
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
 import json
-from custom_json_encoder import MongoJSONEncoder
+from .custom_json_encoder import MongoJSONEncoder
 
 class InteractiveShell:
     def __init__(self, mongo_shell):
