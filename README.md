@@ -52,3 +52,4 @@ python implementation of mongosh for when you don't have what you need.
     - `command <command_json>`: Execute a MongoDB command.
     - `insert <collection_name> <document_json>`: Insert a document into a collection.
     - `exit`: Exit the shell.
+    - `help`: Show help prompt
