@@ -1,5 +1,5 @@
-from mongo_shell import MongoShell
-from shell import InteractiveShell
+from .mongo_shell import MongoShell
+from .shell import InteractiveShell
 
 def main():
     uri = "mongodb://localhost:27017"
