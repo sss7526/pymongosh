@@ -1,2 +1,2 @@
 # pymongosh
-python implementation of pymongosh for when you don't have what you need
+python implementation of mongosh for when you don't have what you need
