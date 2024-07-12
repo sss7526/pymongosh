@@ -53,3 +53,21 @@ python implementation of mongosh for when you don't have what you need.
     - `insert <collection_name> <document_json>`: Insert a document into a collection.
     - `exit`: Exit the shell.
     - `help`: Show help prompt
+
+## Example
+
+```sh
+mongo-shell> list_databases
+['admin', 'local', 'test']
+
+mongo-shell> use test
+Using database: test
+
+mongo-shell> list_collections
+['users', 'orders']
+
+mongo-shell> query users '{"name": "John"}'
+[{"_id": ObjectId("..."), "name": "John", "age": 30}]
+
+mongo-shell> command {"ping": 1}
+{"ok": 1.0}
