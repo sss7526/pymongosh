@@ -17,6 +17,8 @@ class InteractiveShell:
             'list_collections', 
             'query', 
             'command',
+            'drop_database',
+            'drop_collection',
             'exit',
             'help'
         ], ignore_case=True)
@@ -27,7 +29,6 @@ class InteractiveShell:
 
             try:
                 with patch_stdout():
-                    #user_input = self.session.prompt('mongo-shell>', completer=self.commands, complete_while_typing=True).strip()
                     user_input = self.read_command()
 
                 if not user_input:
@@ -35,7 +36,7 @@ class InteractiveShell:
                 
                 if user_input.startswith('db.'):
                     result = self.process_db_commands(user_input)
-                    print(result)
+                    print(self.format_output(result))
                 
                 else:
                     command_components = user_input.split(' ', 1)
@@ -90,6 +91,14 @@ class InteractiveShell:
                         collection, document = coll_doc
                         result = self.mongo_shell.insert_document(collection, document)
                         print(self.format_output(result))
+                    
+                    elif command == 'drop_database':
+                        result = self.drop_database(args)
+                        print(self.format_output(result))
+
+                    elif command == 'drop_collection':
+                        result = self.drop_collection(args)
+                        print(self.format_output(result))
 
                     elif command == 'help':
                         self.display_help()
@@ -143,6 +152,24 @@ class InteractiveShell:
         
         return multiline_input.strip()
     
+    def drop_database(self, db_name):
+        try:
+            self.mongo_shell.client.drop_database(db_name)
+            return {"ok": 1}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def drop_collection(self, collection_name):
+        if self.mongo_shell.db is None:
+            return {"error": "No database selected. Use 'use <database_name>' to select a database."}
+        
+        try:
+            self.mongo_shell.db.drop_collection(collection_name)
+            return {"ok": 1}
+        except Exception as e:
+            return {"error": str(e)}
+
+
     def is_complete(self, text):
         # command is considered complete if the number of opening brackets matches the number of closing brackets
         if (text.count('(') == text.count(')') and 
@@ -153,21 +180,46 @@ class InteractiveShell:
 
     def display_help(self):
         help_message = """
-Availabale Commands:
-    list_databases                      Lists all databases
-    use <database_name>                 Switches to the specified database
-    list_collections                    Lists all collections in the current database
-    query <collection> <query_json>     Executes a query on the specified collection. Use JSON format for the query.
-    command <command_json>              Executes a JSON command on the current database.
-    insert <collection> <document_json> Inserts a document into the specified collection. Use JSON format for the document.
-    help                                Displays this help message.
-    exit                                Exits the MongoDB shell.
-    
+Available commands:
+  list_databases                                Lists all databases.
+  use <database_name>                           Switches to the specified database.
+  list_collections                              Lists all collections in the current database.
+  query <collection> <query_json>               Executes a query on the specified collection. Use JSON format for the query.
+  command <command_json>                        Executes a JSON command on the current database.
+  insert <collection> <document_json>           Inserts a document into the specified collection. Use JSON format for the document.
+  drop_database <database_name>                 Drops the specified database.
+  drop_collection <collection_name>             Drops the specified collection.
+  help                                          Displays this help message.
+  exit                                          Exits the MongoDB shell.
+
+Using the db alias:
+  db.<collection>.<method>(<args>)              Executes a MongoDB method on the specified collection.
+
 Examples:
-    use mydatabase
-    list_collections
-    query mycollection {"field": "value"}
-    command {"ping": 1}
-    insert mycollection {"field": "value"}
+  use mydatabase
+  list_collections
+  query mycollection {"field": "value"}
+  command {"ping": 1}
+  insert mycollection {"field": "value"}
+  drop_database mydatabase
+  drop_collection mycollection
+  db.mycollection.find({"field": "value"})
+  db.mycollection.insert_one({"field": "value"})
+  db.mycollection.update_one({"field": "value"}, {"$set": {"field": "new_value"}})
+  db.mycollection.delete_one({"field": "value"})
+  
+Multi-line JSON Input:
+  You can enter multi-line JSON for queries and commands. 
+  The input will be accepted once all brackets are balanced.
+
+  {
+      "field1": "value1",
+      "field2": "value2"
+  }
+
+  db.mycollection.find_one({
+      "field1": "value1",
+      "field2": "value2"
+  })
         """
         print(help_message)
