@@ -130,14 +130,22 @@ class InteractiveShell:
     
     def process_db_commands(self, command):
         command = command[3:]
-        collection_name, method_call = command.split('.', 1)
-        method_name, args_json = method_call.split('(', 1)
-        args_json = args_json.rstrip(')')
-        args = json.loads('[' + args_json + ']')
+        parts = command.split('.', 1)
+        if len(parts) == 1:
+            method_name, args_json = parts[0].split('(', 1)
+            args_json = args_json.rstrip(')')
+            args = json.loads('[' + args_json + ']')
+            method = getattr(self.db, method_name)
+            result = method(*args)
+        else:
+            collection_name, method_call = parts
+            method_name, args_json = method_call.split('(', 1)
+            args_json = args_json.rstrip(')')
+            args = json.loads('[' + args_json + ']')
 
-        collection = getattr(self.db, collection_name)
-        method = getattr(collection, method_name)
-        result = method(*args)
+            collection = getattr(self.db, collection_name)
+            method = getattr(collection, method_name)
+            result = method(*args)
         return result
         
     def read_command(self):
@@ -162,6 +170,9 @@ class InteractiveShell:
     def drop_collection(self, collection_name):
         if self.mongo_shell.db is None:
             return {"error": "No database selected. Use 'use <database_name>' to select a database."}
+        
+        if collection_name not in self.mongo_shell.db.list_collection_names():
+            return {"error": f"Collection '{collection_name}' does not exist"}
         
         try:
             self.mongo_shell.db.drop_collection(collection_name)
@@ -194,6 +205,7 @@ Available commands:
 
 Using the db alias:
   db.<collection>.<method>(<args>)              Executes a MongoDB method on the specified collection.
+  db.<command>(<args>)                          Executes a MongoDB database method.
 
 Examples:
   use mydatabase
@@ -207,7 +219,12 @@ Examples:
   db.mycollection.insert_one({"field": "value"})
   db.mycollection.update_one({"field": "value"}, {"$set": {"field": "new_value"}})
   db.mycollection.delete_one({"field": "value"})
-  
+  db.addUser({"user": "username", "pwd": "password", "roles": ["readWrite"]})
+  db.removeUser("username")
+  db.createRole({"role": "myRole", "privileges": [{"resource": {"db": "mydatabase", "collection": ""}, "actions": ["find"]}], "roles": []})
+  db.dropRole("myRole")
+  db.getUser("username")
+
 Multi-line JSON Input:
   You can enter multi-line JSON for queries and commands. 
   The input will be accepted once all brackets are balanced.
