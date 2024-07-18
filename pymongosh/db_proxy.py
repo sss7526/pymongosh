@@ -10,21 +10,56 @@ class DBProxy:
             raise Exception("No database selecte. Use 'use <database_name>' to select a database")
         
         # Handle database-level commands
-        if name in ['addUser', 'createRole', 'dropUser', 'dropRole', 'grantRolesToUser', 'revokeRolesFromUser']:
-            def command_method(*args):
-                command = {name: args[0]} if args else {name: 1}
-                return self.mongo_shell.db.command(command)
-            return command_method
-        
-        if name == 'dropDatabase':
-            self.is_db_command = True
-            return self._drop_db
+        if name in ['addUser', 'createRole', 'dropUser', 'dropRole', 'grantRolesToUser', 'revokeRolesFromUser', 'getUser', 'dropDatabase']:
+            return getattr(self, name)
         
         return MethodProxy(self.mongo_shell.db, name)
     
-    def _drop_db(self):
+    def addUser(self, *args, **kwargs):
         try:
-            return self.mongo_sehll.client.drop_database(self.mongo_shell.db.name)
+            return self.mongo_shell.db.add_user(*args, **kwargs)
+        except Exception as e:
+            return f'Error: {str(e)}'
+        
+    def createRole(self, *args, **kwargs):
+        try:
+            return self.mongo_shell.db.command('createRole', *args, **kwargs)
+        except Exception as e:
+            return f'Error: {str(e)}'
+        
+    def dropUser(self, *args, **kwargs):
+        try:
+            return self.mongo_shell.db.command('dropUser', *args, **kwargs)
+        except Exception as e:
+            return f'Error: {str(e)}'
+        
+    def dropRole(self, *args, **kwargs):
+        try:
+            return self.mongo_shell.db.command('dropRole', *args, **kwargs)
+        except Exception as e:
+            return f'Error: {str(e)}'
+        
+    def grandRolesToUser(self, user, roles):
+        try:
+            return self.mongo_shell.db.command('grantRolesToUser', user=user, roles=roles)
+        except Exception as e:
+            return f'Error: {str(e)}'
+        
+    def revokeRolesFromUser(self, user, roles):
+        try:
+            return self.mongo_shell.db.command('revokeRolesFromUser', user=user, roles=roles)
+        except Exception as e:
+            return f'Error: {str(e)}'
+        
+    def getUser(self, user):
+        try:
+            return self.mongo_shell.db.command('usersInfo', {'user': user})
+        except Exception as e:
+            return f'Error: {str(e)}'
+
+    def dropDatabase(self, *args, **kwargs):
+        try:
+            return self.mongo_shell.client.drop_database(self.mongo_shell.db.name)
         
         except Exception as e:
             return f'Error: {str(e)}'
