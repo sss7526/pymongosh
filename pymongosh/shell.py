@@ -121,7 +121,10 @@ class InteractiveShell:
     def read_command(self):
         multiline_input = ""
         while True:
-            prompt = 'mongo-shell> ' if not multiline_input else '... '
+            if self.mongo_shell.db is not None:
+                prompt = f'mongo-shell [{self.mongo_shell.db.name}]> ' if not multiline_input else '... '
+            else:
+                prompt = 'mongo-shell [No DB]> ' if not multiline_input else '... '
             user_input = self.session.prompt(prompt, completer=self.commands)
             multiline_input += user_input + "\n"
             if self.is_complete(multiline_input):
@@ -160,68 +163,18 @@ Available commands:
   list_databases                                Lists all databases.
   use <database_name>                           Switches to the specified database.
   list_collections                              Lists all collections in the current database.
-  query <collection> <query_json>               Executes a query on the specified collection. Use JSON format for the query.
+  query <collection_name> <query_json>          Executes a query on the specified collection. Use JSON format for the query.
   command <command_json>                        Executes a JSON command on the current database.
-  insert <collection> <document_json>           Inserts a document into the specified collection. Use JSON format for the document.
+  insert <collection_name> <document_json>      Inserts a document into the specified collection. Use JSON format for the document.
   drop_database <database_name>                 Drops the specified database.
   drop_collection <collection_name>             Drops the specified collection.
   help                                          Displays this help message.
   exit                                          Exits the MongoDB shell.
 
 Using the db alias:
-  db.<collection>.<method>(<args>)              Executes a MongoDB method on the specified collection.
-  db.<command>(<args>)                          Executes a MongoDB database method.
+  db.<collection_name>.<method>(<args>)         Executes a MongoDB method on the specified collection.
+  db.<command>(<args>)                          Executes a MongoDB database command.
 
-Examples:
-  use mydatabase
-  list_databases
-  list_collections
-  query mycollection {"field": "value"}
-  command {"ping": 1}
-  insert mycollection {"field": "value"}
-  drop_database mydatabase
-  drop_collection mycollection
-
-
-  db.mycollection.find({"field": "value"})
-  db.mycollection.insert_one({"field": "value"})
-  db.mycollection.update_one({"field": "value"}, {"$set": {"field": "new_value"}})
-  db.mycollection.delete_one({"field": "value"})
-
-  db.add_user(
-    "testUser", "password123", 
-    [{"role": "readWrite", "db": "mydatabase"}]
-    )
-  db.drop_user("username")
-  db.create_role({
-      "role": "myRole",
-      "privileges": [
-          {
-              "resource": {"db": "mydatabase", "collection": ""},
-              "actions": ["find"]
-          }
-      ],
-      "roles": []
-  })
-  db.drop_role("myRole")
-  db.grant_roles_to_user("username", ["myRole"])
-  db.revoke_roles_from_user("username", ["myRole"])
-  db.get_user("testUser")
-  db.dropDatabase()
-  db.runCommand({"usersInfo":1})
-
-Multi-line JSON Input:
-  You can enter multi-line JSON for queries and commands. 
-  The input will be accepted once all brackets are balanced.
-
-  {
-      "field1": "value1",
-      "field2": "value2"
-  }
-
-  db.mycollection.find_one({
-      "field1": "value1",
-      "field2": "value2"
-  })
+For detailed usage examples, visit: https://github.com/sss7526/pymongosh
         """
         print(help_message)

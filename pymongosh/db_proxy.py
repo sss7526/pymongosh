@@ -9,12 +9,12 @@ class DBProxy:
             raise Exception("No database selected. Use 'use <database_name>' to select a database")
         
         # Handle database-level commands
-        if name in ['addUser', 'createRole', 'dropUser', 'dropRole', 'grantRolesToUser', 'revokeRolesFromUser', 'getUser', 'dropDatabase']:
+        if name in ['createUser', 'createRole', 'dropUser', 'dropRole', 'grantRolesToUser', 'revokeRolesFromUser', 'getUser', 'dropDatabase']:
             return getattr(self, name)
         
         return MethodProxy(self.mongo_shell.db, name)
 
-    def addUser(self, username, password, roles):
+    def createUser(self, username, password, roles):
         try:
             # Construct the command properly
             command = {
