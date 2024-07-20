@@ -23,13 +23,14 @@ class DBProxy:
                 "roles": roles
             }
             result = self.mongo_shell.db.command(command)
+            print(f'Command result for addUser: {result}')
             return result
         except Exception as e:
             return {"ok": 0, "error": str(e)}
         
-    def createRole(self, *args, **kwargs):
+    def createRole(self, role_def):
         try:
-            return self.mongo_shell.db.command('createRole', *args, **kwargs)
+            return self.mongo_shell.db.command(role_def)
         except Exception as e:
             return {"ok": 0, "error": str(e)}
         
@@ -47,13 +48,21 @@ class DBProxy:
         
     def grantRolesToUser(self, user, roles):
         try:
-            return self.mongo_shell.db.command('grantRolesToUser', user=user, roles=roles)
+            command = {
+                'grantRolesToUser': user,
+                'roles':roles
+            }
+            return self.mongo_shell.db.command(command)
         except Exception as e:
             return {"ok": 0, "error": str(e)}
         
     def revokeRolesFromUser(self, user, roles):
         try:
-            return self.mongo_shell.db.command('revokeRolesFromUser', user=user, roles=roles)
+            command = {
+                'revokeRolesFromUser': user,
+                'roles': roles
+            }
+            return self.mongo_shell.db.command(command)
         except Exception as e:
             return {"ok": 0, "error": str(e)}
         
@@ -69,3 +78,10 @@ class DBProxy:
             return {"ok":1}
         except Exception as e:
             return {"ok": 0, "error": str(e)}
+        
+    def runCommand(self, command):
+        try:
+            result = self.mongo_shell.db.command(command)
+            return result
+        except Exception as e:
+            return {"ok":0, "error": str(e)}
