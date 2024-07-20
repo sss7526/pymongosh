@@ -174,17 +174,24 @@ Using the db alias:
 
 Examples:
   use mydatabase
+  list_databases
   list_collections
   query mycollection {"field": "value"}
   command {"ping": 1}
   insert mycollection {"field": "value"}
   drop_database mydatabase
   drop_collection mycollection
+
+
   db.mycollection.find({"field": "value"})
   db.mycollection.insert_one({"field": "value"})
   db.mycollection.update_one({"field": "value"}, {"$set": {"field": "new_value"}})
   db.mycollection.delete_one({"field": "value"})
-  db.add_user("username", "password", roles=["readWrite"])
+
+  db.add_user(
+    "testUser", "password123", 
+    [{"role": "readWrite", "db": "mydatabase"}]
+    )
   db.drop_user("username")
   db.create_role({
       "role": "myRole",
@@ -199,7 +206,9 @@ Examples:
   db.drop_role("myRole")
   db.grant_roles_to_user("username", ["myRole"])
   db.revoke_roles_from_user("username", ["myRole"])
-  db.get_user("username")
+  db.get_user("testUser")
+  db.dropDatabase()
+  db.runCommand({"usersInfo":1})
 
 Multi-line JSON Input:
   You can enter multi-line JSON for queries and commands. 
