@@ -84,7 +84,7 @@ class MongoShell:
         
         except Exception as e:
             return f'Error: {str(e)}'
-    
+        
     def bson_object_hook(self, dct):
         for key, value in dct.items():
             if isinstance(value, dict):
