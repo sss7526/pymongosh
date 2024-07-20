@@ -23,7 +23,6 @@ class DBProxy:
                 "roles": roles
             }
             result = self.mongo_shell.db.command(command)
-            print(f'Command result for addUser: {result}')
             return result
         except Exception as e:
             return {"ok": 0, "error": str(e)}
