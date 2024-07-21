@@ -41,12 +41,29 @@ pip install -r requirements.txt
 
 ## Usage
 
-Ensure your MongoDB instance is running.
+- **No Arguments (Defaults to localhost:27017):**
+  ```sh
+  python -m pymongosh
+  ```
+  This will use the default `mongodb://localhost:27017`.
 
-Run the interactive shell:
-```sh
-python -m pymongosh
-```
+- **Full URI (No Flag Needed):**
+  ```sh
+  python -m pymongosh mongodb://user:password@localhost:27017
+  ```
+
+- **Host and Port:**
+  ```sh
+  python -m pymongosh --host someotherhost --port 27018
+  ```
+  This will construct the URI using the provided host and port, i.e., `mongodb://someotherhost:27018`.
+
+- **With Username and Password:**
+  ```sh
+  python -m pymongosh --host localhost --port 27017 --username myUser --password myPassword
+  ```
+  This will construct the URI `mongodb://myUser:myPassword@localhost:27017`.
+
 
 
 ### list_databases
@@ -151,7 +168,7 @@ The following include a set of usage examples for the `db` alias commands at bot
 
 ### Database-Level Commands
 
-1. **addUser()**
+1. **createUser()**
 
     Adds a new user with specified roles to the database.
     ```python
