@@ -15,6 +15,10 @@ def parse_the_args():
     
     parser.add_argument("-u", "--username", type=str, help="MongoDB username")
     parser.add_argument("-p", "--password", type=str, help="MongoDB password")
+    parser.add_argument("--authenticationDatabase", type=str, help="Database to authenticate against")
+    parser.add_argument("--authenticationMechanism", type=str, help="Authentication mechanism to use")
+
+    parser.add_argument("--tls", action="store_true", help="Use TLS/SSL when connecting to MongoDB")
 
     args = parser.parse_args()
     return args
@@ -27,12 +31,32 @@ def main():
     else:
         host = args.host
         port = args.port
+        query_params = {}
+
         if args.username and args.password:
             username = urllib.parse.quote_plus(args.username)
             password = urllib.parse.quote_plus(args.password)
-            uri = f'mongodb://{username}:{password}@{host}:{port}'
+            credentials = f'{username}:{password}@'
+
+            if args.authenticationDatabase:
+                query_params['authSource'] = args.authenticationDatabase
+            else:
+                query_params['authSource'] = 'admin'
+
+            if args.authenticationMechanism:
+                query_params['authMechanism'] = args.authenticationMechanism
+            else:
+                query_params['authMechanism'] = 'SCRAM-SHA-256'
+
+            uri = f'mongodb://{credentials}{host}:{port}'
         else:
             uri = f'mongodb://{host}:{port}'
+
+        if args.tls:
+            query_params['tls'] = 'true'
+
+        if query_params:
+            uri += "?" + '&'.join(f'{key}={value}' for key, value in query_params.items())
 
     mongo_shell = MongoShell(uri)
     shell = InteractiveShell(mongo_shell)
